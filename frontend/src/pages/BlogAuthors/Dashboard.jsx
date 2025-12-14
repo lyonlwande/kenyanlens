@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 
 const DashBoard = () => {
   const [dashboardData, setDashboardData] = useState({
