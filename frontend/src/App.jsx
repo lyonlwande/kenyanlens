@@ -14,6 +14,7 @@ import Comments from './pages/BlogAuthors/Comments.jsx';
 const App = () => {
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
+  
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
