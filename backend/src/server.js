@@ -41,17 +41,6 @@ app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
 
 // FIXED: Use one of these patterns for your catch-all route:
 
-// Option 1: Regular expression (recommended)
-
-//app.get(/\/(.*)/, (req, res) => {
-  //res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
-//});
-
-// Option 2: Named parameter with wildcard
-// app.get('/:path(*)', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
-// });
-
 // Option 3: Handle all non-API routes explicitly
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
