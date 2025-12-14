@@ -21,7 +21,32 @@ function requestLogger(req, res, next) {
 
 const FRONTEND_ORIGIN = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Security headers middleware
+function securityHeaders(req, res, next) {
+  // Remove any restrictive CSP headers first
+  res.removeHeader('Content-Security-Policy');
+  res.removeHeader('X-Content-Security-Policy');
+  
+  // Set proper CSP headers
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "font-src 'self' data: https:; " +
+    "img-src 'self' data: https:; " +
+    "connect-src 'self' https://kenyanlens.onrender.com;"
+  );
+  
+  // Other security headers
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+}
+
 app.use(requestLogger);
+app.use(securityHeaders); // Add this middleware
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || [FRONTEND_ORIGIN].includes(origin)) {
@@ -35,8 +60,29 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve static files FIRST (before API routes)
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
+// Serve static files from frontend with proper headers
+app.use('/assets', express.static(path.join(__dirname, 'frontend', 'dist', 'assets'), {
+  maxAge: '1y',
+  setHeaders: (res, path) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+}));
+
+app.use(express.static(path.join(__dirname, 'frontend', 'dist'), {
+  maxAge: '1h',
+  setHeaders: (res, path) => {
+    // Remove any restrictive CSP for static files
+    res.removeHeader('Content-Security-Policy');
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "font-src 'self' data: https:; " +
+      "img-src 'self' data: https:;"
+    );
+  }
+}));
 
 // Import routers
 import authRoutes from './Modules/Authentication/auth.routes.js';
@@ -46,12 +92,17 @@ import userRoutes from './Modules/User/user.routes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Instead of app.get('*', ...) use:
-app.get(/^(?!\/api).*/, (req, res) => {
-  // Skip if it looks like a file request
-  if (req.path.includes('.')) {
-    return res.status(404).json({ error: 'Not found' });
+// Catch-all route for SPA
+app.get('*', (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return next();
   }
+  // Skip if it looks like a file request (has an extension)
+  if (req.path.includes('.')) {
+    return next();
+  }
+  // Otherwise send the React app
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
