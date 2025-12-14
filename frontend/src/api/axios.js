@@ -6,6 +6,7 @@ export const axiosInstance = axios.create({
   withCredentials: true, // Ensure cookies are sent with requests
 });
 
+
 // Add a request interceptor to include the Authorization header
 axiosInstance.interceptors.request.use(
   (config) => {
