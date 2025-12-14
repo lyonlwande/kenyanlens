@@ -1,6 +1,6 @@
 import axios from "axios";
 import useAuthStore from "../zustandStores/authStore.js";
-
+ //  "http://localhost:5555/api"
 export const axiosInstance = axios.create({
   baseURL: "https://kenyanlens.onrender.com/api", // Base URL for your API (use your PC's local IP)
   withCredentials: true, // Ensure cookies are sent with requests

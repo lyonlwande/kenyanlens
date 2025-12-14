@@ -4,9 +4,13 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/dbConnection.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
 dotenv.config();
 
-const __dirname = path.resolve(); 
+// Get __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
 // Request logger middleware
@@ -31,6 +35,9 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// Serve static files FIRST (before API routes)
+app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
+
 // Import routers
 import authRoutes from './Modules/Authentication/auth.routes.js';
 import userRoutes from './Modules/User/user.routes.js';
@@ -39,14 +46,19 @@ import userRoutes from './Modules/User/user.routes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Serve static files from frontend
-app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
-
-
-app.get(/\/(.*)/, (req, res) => {
+// Instead of app.get('*', ...) use:
+app.get(/^(?!\/api).*/, (req, res) => {
+  // Skip if it looks like a file request
+  if (req.path.includes('.')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
+// 404 handler for unmatched routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGODB_URL ?? 'mongodb://localhost:27017/kenyanlens';
