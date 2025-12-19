@@ -16,7 +16,10 @@ const Layout = () => {
   return (
     <>
       <div className="flex items-center justify-between py-2 px-4 h-[50px] md:h-[70px]  border-b border-gray-200">
-        <img src={assets.egaTradeLogo} alt="" className='w-10 sm:w-20 md:w-16 cursor-pointer' onClick={() => navigate('/')} />
+        <div className="flex items-center gap-2">
+                <img src={assets.egaTradeLogo} alt="Logo" className="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
+                <p className="text-purple-900 font-bold text-xl sm:text-2xl lg:text-3xl">KenyanLens</p>
+              </div>
         <button
           className='text-sm px-8 py-2 bg-purple-700 text-white rounded-full cursor-pointer'
           onClick={handleLogout}
