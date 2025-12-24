@@ -6,21 +6,37 @@ export const validateBlog = [
   body('title').isString().trim().notEmpty().withMessage('Title is required'),
   body('slug').optional().isString().trim(),
   body('description').isString().trim().notEmpty().isLength({ max: 300 }).withMessage('Description is required and max 300 chars'),
-  body('thumbnail').isString().notEmpty().withMessage('Thumbnail is required'),
-  body('category').isString().isIn([
-    'Lifestyle',
-    'Culture & Ideas',
-    'Conversations',
-    'Inspiration',
-    'Daily Experiences',
-    'Technology',
-    'Current Issues'
-  ]).withMessage('Invalid category'),
+  // Allow thumbnail to be set after file upload (skip validation if file is present)
+  body('thumbnail').custom((value, { req }) => {
+    if (req.file) return true; // If file is uploaded, skip thumbnail string check
+    if (typeof value === 'string' && value.trim() !== '') return true;
+    throw new Error('Thumbnail is required');
+  }),
+  body('category').isString().trim().notEmpty().withMessage('Category is required'),
   body('author').optional().isMongoId(),
   body('status').optional().isIn(['draft', 'published', 'archived']),
+  // Custom validation for image blocks in content
+  body('content').custom((blocks, { req }) => {
+    if (!Array.isArray(blocks)) return true; // skip if not array
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      if (block.type === 'image') {
+        // filePath must exist and url must not exist
+        if (!block.filePath || typeof block.filePath !== 'string' || block.filePath.trim() === '') {
+          throw new Error(`Image block at index ${i} is missing filePath.`);
+        }
+        if ('url' in block && block.url) {
+          throw new Error(`Image block at index ${i} should not have a url.`);
+        }
+      }
+    }
+    return true;
+  }),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('[validateBlog] Request body:', req.body);
+      console.log('[validateBlog] Validation errors:', errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
     next();

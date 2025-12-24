@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
+import 'quill/dist/quill.snow.css';
 import Home from './pages/Home.jsx'
 import Blog from './pages/Blog.jsx'
 import Login from './pages/Login.jsx';
@@ -11,6 +12,7 @@ import DashBoard from './pages/BlogAuthors/Dash.jsx';
 import AddBlog from './pages/BlogAuthors/AddBlog.jsx';
 import ListBlog from './pages/BlogAuthors/ListBlog.jsx';
 import Comments from './pages/BlogAuthors/Comments.jsx';
+import DraftsList from './pages/BlogAuthors/DraftsList.jsx';
 const App = () => {
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
@@ -32,6 +34,7 @@ const App = () => {
           <Route path='addBlog' element={<AddBlog/>}/>
           <Route path='listBlog' element={<ListBlog/>}/>
           <Route path='comments' element={<Comments/>} />
+          <Route path='drafts' element={<DraftsList/>} />
         </Route>
       </Routes>
     </div>

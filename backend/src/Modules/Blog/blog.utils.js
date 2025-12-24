@@ -1,3 +1,13 @@
+// Clean image blocks in content array (remove url, keep only filePath)
+export function cleanImageBlocks(contentBlocks) {
+  if (!Array.isArray(contentBlocks)) return contentBlocks;
+  return contentBlocks.map(block => {
+    if (block.type === 'image' && block.data) {
+      if ('url' in block.data) delete block.data.url;
+    }
+    return block;
+  });
+}
 // blog.utils.js
 
 // Generate a URL-friendly slug from a blog title

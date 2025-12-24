@@ -50,18 +50,16 @@ const contentBlockSchema = new mongoose.Schema(
       }
     ],
 
-    /* MEDIA */
-    url: {
-      type: String
-    },
-    caption: {
-      type: String
-    },
-    provider: {
-      type: String //  cloudinary .
+    /* MEDIA (for image blocks, only file uploads allowed) */
+    filePath: {
+      type: String,
+      required: function() { return this.type === 'image'; }
     },
     alt: {
       type: String // accessibility for images
+    },
+    caption: {
+      type: String
     },
     transcript: {
       type: String // accessibility for video/audio

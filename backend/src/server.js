@@ -36,15 +36,50 @@ import userRoutes from './Modules/User/user.routes.js';
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
+// Import and mount blog routes
+import blogRoutes from './Modules/Blog/blog.routes.js';
+app.use('/api/blogs', blogRoutes);
+
+
+// Global error handler for detailed logging
+app.use((err, req, res, next) => {
+  // Enhanced Multer file size error logging
+  let fileSize = null;
+  if (err && err.name === 'MulterError' && err.code === 'LIMIT_FILE_SIZE') {
+    if (req && req.files) {
+      const allFiles = Object.values(req.files).flat();
+      if (allFiles.length) {
+        fileSize = Math.max(...allFiles.map(f => f.size));
+      }
+    }
+    console.error('[GlobalErrorHandler]', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      fileSize,
+      ...('errors' in err ? { errors: err.errors } : {})
+    });
+  } else {
+    console.error('[GlobalErrorHandler]', {
+      message: err.message,
+      stack: err.stack,
+      name: err.name,
+      ...('errors' in err ? { errors: err.errors } : {})
+    });
+  }
+  res.status(err.status || 500).json({
+    error: err.message,
+    ...(err.errors ? { errors: err.errors } : {})
+  });
+});
+
 // Serve static files from frontend
 app.use(express.static(path.join(__dirname, 'frontend', 'dist')));
-
-// FIXED: Use one of these patterns for your catch-all route:
 
 // Option 3: Handle all non-API routes explicitly
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
- });
+});
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URL = process.env.MONGODB_URL ?? 'mongodb://localhost:27017/kenyanlens';

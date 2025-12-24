@@ -3,6 +3,16 @@ import Blog from './blog.model.js';
 class BlogRepository {
   // Create a new blog post
   async createBlog(data) {
+    // Clean image blocks before saving
+    if (Array.isArray(data.content)) {
+      data.content = data.content.map(block => {
+        if (block.type === 'image' && block.data) {
+          // Remove url if present
+          if ('url' in block.data) delete block.data.url;
+        }
+        return block;
+      });
+    }
     return await Blog.create(data);
   }
 
@@ -20,13 +30,22 @@ class BlogRepository {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .populate('author')
-      .populate('comments')
-      .populate('tags');
+        .populate('author')
+        // .populate('comments') // Temporarily disabled until Comment model is ready
+        .populate('tags');
   }
 
   // Update a blog by ID
   async updateBlog(id, updateData) {
+    // Clean image blocks before updating
+    if (Array.isArray(updateData.content)) {
+      updateData.content = updateData.content.map(block => {
+        if (block.type === 'image' && block.data) {
+          if ('url' in block.data) delete block.data.url;
+        }
+        return block;
+      });
+    }
     return await Blog.findByIdAndUpdate(id, updateData, { new: true });
   }
 

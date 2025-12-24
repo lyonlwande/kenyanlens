@@ -1,3 +1,4 @@
+
 import {v2 as cloudinary} from "cloudinary";
 import { config } from "dotenv";
 import fs from "fs";
@@ -12,6 +13,31 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+/**
+ * Extract Cloudinary public ID from a filePath (URL)
+ * @param {string} filePath - Cloudinary URL
+ * @returns {string} - Public ID
+ */
+export const extractCloudinaryPublicId = (filePath) => {
+  if (!filePath) return '';
+  // Example: https://res.cloudinary.com/<cloud_name>/image/upload/v123456789/images/abcde.jpg
+  // Extract everything after '/upload/' and before file extension
+  try {
+    const uploadIdx = filePath.indexOf('/upload/');
+    if (uploadIdx === -1) return '';
+    let publicId = filePath.substring(uploadIdx + 8); // after '/upload/'
+    // Remove version if present (e.g., v123456789/)
+    publicId = publicId.replace(/^v[0-9]+\//, '');
+    // Remove query params if present
+    publicId = publicId.split('?')[0];
+    // Remove file extension
+    publicId = publicId.replace(/\.[a-zA-Z0-9]+$/, '');
+    return publicId;
+  } catch {
+    return '';
+  }
+};
 
 /**
  * Enhanced file upload function for Cloudinary

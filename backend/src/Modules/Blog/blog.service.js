@@ -14,6 +14,16 @@ const blogRepo = new BlogRepository();
 class BlogService {
   // Create a new blog post
   async createBlog(data) {
+    // Ensure image blocks only use filePath, not url
+    if (Array.isArray(data.content)) {
+      data.content = data.content.map(block => {
+        if (block.type === 'image' && block.data) {
+          // Remove url if present
+          if ('url' in block.data) delete block.data.url;
+        }
+        return block;
+      });
+    }
     // Generate slug if not provided
     if (!data.slug && data.title) {
       data.slug = generateSlug(data.title);

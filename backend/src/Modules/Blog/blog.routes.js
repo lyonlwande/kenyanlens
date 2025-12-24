@@ -1,14 +1,24 @@
 import express from 'express';
 import blogController from './blog.controller.js';
-import authMiddleware from '../Authentication/auth.middleware.js';
+import DraftController from './draft.controller.js';
+import { requireAuth } from '../Authentication/auth.middleware.js';
 import { validateBlog, validateBlogId, validateCommentId, validateSearchQuery } from './blog.middleware.js';
+import upload, { blogUpload } from '../../config/multer.js';
 
+
+const draftController = new DraftController();
 const router = express.Router();
 
+// Draft routes
+router.post('/drafts', requireAuth, blogUpload, draftController.createDraft);
+router.put('/drafts/:id', requireAuth, blogUpload, draftController.updateDraft);
+router.get('/drafts', requireAuth, draftController.getDrafts);
+router.get('/drafts/:id', requireAuth, draftController.getDraftById);
+router.delete('/drafts/:id', requireAuth, draftController.deleteDraft);
+router.post('/drafts/:id/publish', requireAuth, draftController.publishDraft);
 
-
-// Create a new blog post (protected, validated)
-router.post('/', authMiddleware, validateBlog, blogController.createBlog);
+// Create a new blog post (protected, validated, with image and blockImages upload)
+router.post('/', requireAuth, blogUpload, validateBlog, blogController.createBlog);
 
 // Get all blogs (public)
 router.get('/', blogController.getBlogs);
@@ -17,34 +27,34 @@ router.get('/', blogController.getBlogs);
 router.get('/:id', validateBlogId, blogController.getBlogById);
 
 // Update a blog (protected, validated)
-router.put('/:id', authMiddleware, validateBlogId, validateBlog, blogController.updateBlog);
+router.put('/:id', requireAuth, blogUpload, validateBlogId, validateBlog, blogController.updateBlog);
 
 // Soft delete a blog (protected, validated)
-router.delete('/:id', authMiddleware, validateBlogId, blogController.deleteBlog);
+router.delete('/:id', requireAuth, validateBlogId, blogController.deleteBlog);
 
 // Restore a soft-deleted blog (protected, validated)
-router.patch('/:id/restore', authMiddleware, validateBlogId, blogController.restoreBlog);
+router.patch('/:id/restore', requireAuth, validateBlogId, blogController.restoreBlog);
 
 // Hard delete a blog (protected, validated)
-router.delete('/:id/hard', authMiddleware, validateBlogId, blogController.hardDeleteBlog);
+router.delete('/:id/hard', requireAuth, validateBlogId, blogController.hardDeleteBlog);
 
 // Search blogs (public, validated)
 router.get('/search', validateSearchQuery, blogController.searchBlogs);
 
 // Like a blog (protected, validated)
-router.post('/:id/like', authMiddleware, validateBlogId, blogController.likeBlog);
+router.post('/:id/like', requireAuth, validateBlogId, blogController.likeBlog);
 
 // Unlike a blog (protected, validated)
-router.post('/:id/unlike', authMiddleware, validateBlogId, blogController.unlikeBlog);
+router.post('/:id/unlike', requireAuth, validateBlogId, blogController.unlikeBlog);
 
 // Add comment to blog (protected, validated)
-router.post('/:id/comment', authMiddleware, validateBlogId, validateCommentId, blogController.addComment);
+router.post('/:id/comment', requireAuth, validateBlogId, validateCommentId, blogController.addComment);
 
 // Remove comment from blog (protected, validated)
-router.delete('/:id/comment', authMiddleware, validateBlogId, validateCommentId, blogController.removeComment);
+router.delete('/:id/comment', requireAuth, validateBlogId, validateCommentId, blogController.removeComment);
 
 // Feature/unfeature a blog (protected, validated)
-router.patch('/:id/feature', authMiddleware, validateBlogId, blogController.setFeatured);
+router.patch('/:id/feature', requireAuth, validateBlogId, blogController.setFeatured);
 
 // Get featured blogs (public)
 router.get('/featured', blogController.getFeaturedBlogs);

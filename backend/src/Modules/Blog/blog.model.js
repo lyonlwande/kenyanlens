@@ -43,16 +43,7 @@ const blogSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      required: true,
-      enum: [
-        "Lifestyle",
-        "Culture & Ideas",
-        "Conversations",
-        "Inspiration",
-        "Daily Experiences",
-        "Technology",
-        "Current Issues"
-      ]
+      required: true
     },
 
     tags: [
@@ -83,10 +74,16 @@ const blogSchema = new mongoose.Schema(
       }
     ],
 
+    // comments: [
+    //   {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Comment"
+    //   }
+    // ],
     comments: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Comment"
+        type: mongoose.Schema.Types.ObjectId
+        // ref: "Comment" // deactivated until comment module is ready
       }
     ],
 
