@@ -11,6 +11,7 @@ import Layout from './pages/BlogAuthors/Layout.jsx';
 import DashBoard from './pages/BlogAuthors/Dash.jsx';
 import AddBlog from './pages/BlogAuthors/AddBlog.jsx';
 import ListBlog from './pages/BlogAuthors/ListBlog.jsx';
+import EditBlog from './pages/BlogAuthors/EditBlog.jsx';
 import Comments from './pages/BlogAuthors/Comments.jsx';
 import DraftsList from './pages/BlogAuthors/DraftsList.jsx';
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
           <Route index element={<DashBoard/>}/>
           <Route path='addBlog' element={<AddBlog/>}/>
           <Route path='listBlog' element={<ListBlog/>}/>
+          <Route path='editBlog/:id' element={<EditBlog/>}/>
           <Route path='comments' element={<Comments/>} />
           <Route path='drafts' element={<DraftsList/>} />
         </Route>

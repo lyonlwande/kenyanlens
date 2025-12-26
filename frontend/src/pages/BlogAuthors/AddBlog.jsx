@@ -134,12 +134,6 @@ const AddBlog = () => {
     loadDraft();
   }, [location.state]);
 
-    // Log the active draft whenever it changes
-    useEffect(() => {
-      if (currentDraft) {
-        console.log('[Active Draft]', currentDraft);
-      }
-    }, [currentDraft]);
   // Auto-save draft (debounced) and to localStorage
   useEffect(() => {
     const timeout = setTimeout(async () => {
@@ -193,30 +187,6 @@ const AddBlog = () => {
           formData.append('blockVideos', file);
         });
         formData.append('blockVideoMap', JSON.stringify(blockVideoMap));
-        // Debug log: show all image blocks and their filePath
-        console.log('[AutoSave] Image blocks:');
-        cleanedBlocks.forEach((block, idx) => {
-          if (block.type === 'image') {
-            console.log(`  Block ${idx}: filePath=`, block.data?.filePath);
-          }
-        });
-        // Debug log: show all FormData entries
-        for (let [key, value] of formData.entries()) {
-          if (value instanceof File) {
-            console.log(`[AutoSave] FormData: ${key} = [File] name=${value.name}`);
-          } else {
-            console.log(`[AutoSave] FormData: ${key} =`, value);
-          }
-        }
-        // Log all FormData entries for draft save
-        console.log('[AutoSave] FormData sent to backend:');
-        for (let [key, value] of formData.entries()) {
-          if (value instanceof File) {
-            console.log(`[AutoSave] FormData: ${key} = [File] name=${value.name}`);
-          } else {
-            console.log(`[AutoSave] FormData: ${key} =`, value);
-          }
-        }
         const result = await saveDraft(formData, draftId);
         if (result && result._id) {
           setDraftId(result._id);
@@ -381,13 +351,6 @@ const AddBlog = () => {
       }
       return block;
     });
-    // Debug log: show all image blocks and their filePath
-    console.log('[Submit] Image blocks:');
-    latestBlocks.forEach((block, idx) => {
-      if (block.type === 'image') {
-        console.log(`  Block ${idx}: filePath=`, block.data?.filePath);
-      }
-    });
 
     // If draft exists, publish it
     if (draftId) {
@@ -423,14 +386,6 @@ const AddBlog = () => {
         formData.append('blockVideos', file);
       });
       formData.append('blockVideoMap', JSON.stringify(blockVideoMap));
-      // Debug log: show all FormData entries
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(`[Submit] FormData: ${key} = [File] name=${value.name}`);
-        } else {
-          console.log(`[Submit] FormData: ${key} =`, value);
-        }
-      }
       const result = await createBlog(formData);
       if (result && result._id) {
         setSuccess('Blog created successfully!');
